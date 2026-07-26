@@ -1,0 +1,25 @@
+# Build
+build/
+cmake-build-*/
+out/
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+*.su
+*.d
+
+# IDE
+.idea/
+.vscode/
+*.user
+*.swp
+*~
+
+# macOS
+.DS_Store
+
+# Python / tooling
+__pycache__/
