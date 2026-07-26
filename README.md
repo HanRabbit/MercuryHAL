@@ -1,6 +1,6 @@
 <div align="center">
 
-# MercuryBSP
+# MercuryHAL
 
 **STM32 通用板级支持包（BSP）+ 常用功能模块（Modules）**
 
@@ -35,29 +35,29 @@ HAL 句柄与引脚由**消费工程的 CubeMX** 提供；本库不包含启动�
 
 ```cmake
 # 在你的固件 CMakeLists.txt 中（CubeMX target 已创建之后）
-add_subdirectory(path/to/MercuryBSP)   # 或 FetchContent
+add_subdirectory(path/to/MercuryHAL)   # 或 FetchContent
 
 # 只拉需要的组件（推荐）
-mercury_add_bsp(${CMAKE_PROJECT_NAME}
+mercury_hal_add_bsp(${CMAKE_PROJECT_NAME}
     COMPONENTS dwt gpio log iic segger)
-mercury_add_modules(${CMAKE_PROJECT_NAME}
+mercury_hal_add_modules(${CMAKE_PROJECT_NAME}
     COMPONENTS Algorithm MessageCenter LED)
 
 # 或一次性全开
-# mercury_add_all(${CMAKE_PROJECT_NAME})
+# mercury_hal_add_all(${CMAKE_PROJECT_NAME})
 ```
 
 ### FetchContent 示例
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(MercuryBSP
-    GIT_REPOSITORY https://github.com/HanRabbit/MercuryBSP.git
+FetchContent_Declare(MercuryHAL
+    GIT_REPOSITORY https://github.com/HanRabbit/MercuryHAL.git
     GIT_TAG        main)
-FetchContent_MakeAvailable(MercuryBSP)
+FetchContent_MakeAvailable(MercuryHAL)
 
-mercury_add_bsp(${CMAKE_PROJECT_NAME} COMPONENTS dwt gpio log iic segger)
-mercury_add_modules(${CMAKE_PROJECT_NAME} COMPONENTS LED Daemon)
+mercury_hal_add_bsp(${CMAKE_PROJECT_NAME} COMPONENTS dwt gpio log iic segger)
+mercury_hal_add_modules(${CMAKE_PROJECT_NAME} COMPONENTS LED Daemon)
 ```
 
 ### 启动时初始化
@@ -66,8 +66,8 @@ mercury_add_modules(${CMAKE_PROJECT_NAME} COMPONENTS LED Daemon)
 #include "bsp.h"
 
 void app_init() {
-    MercuryBSP_Init(HAL_RCC_GetHCLKFreq());
-    LOG_INFO("[App] MercuryBSP ready");
+    MercuryHAL_Init(HAL_RCC_GetHCLKFreq());
+    LOG_INFO("[App] MercuryHAL ready");
 }
 ```
 
@@ -140,9 +140,9 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 ## 目录结构
 
 ```
-MercuryBSP/
+MercuryHAL/
 ├── BSP/                  # 外设 C++ 封装
-│   ├── bsp.h             # 伞头 + MercuryBSP_Init()
+│   ├── bsp.h             # 伞头 + MercuryHAL_Init()
 │   ├── dwt/ gpio/ log/ iic/ can/ usart/ spi/ pwm/ usb/
 ├── Modules/              # 通用功能模块
 │   ├── Algorithm/ MessageCenter/ JScope/ Daemon/ LED/ Buzzer/
@@ -150,7 +150,7 @@ MercuryBSP/
 │   └── general_def.h
 ├── third_party/SEGGER/   # RTT
 ├── cmake/                # 预留
-├── CMakeLists.txt        # mercury_add_bsp / mercury_add_modules
+├── CMakeLists.txt        # mercury_hal_add_bsp / mercury_hal_add_modules
 └── README.md
 ```
 

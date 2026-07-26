@@ -1,12 +1,12 @@
 #pragma once
 
 /**
- * MercuryBSP umbrella header.
+ * MercuryHAL umbrella header.
  *
  * Include only what you need in application code for faster builds.
  * This header pulls the portable core set. Optional peripherals
  * (FDCAN / I2C / USART / SPI / PWM / USB) are included when the
- * corresponding MERCURY_BSP_HAS_* macros are defined by CMake, or
+ * corresponding MERCURY_HAL_HAS_* macros are defined by CMake, or
  * you can include their headers directly.
  */
 
@@ -14,28 +14,28 @@
 #include "bsp_gpio.h"
 #include "bsp_log.h"
 
-#if defined(MERCURY_BSP_HAS_IIC)
+#if defined(MERCURY_HAL_HAS_IIC)
 #include "bsp_iic.h"
 #include "bsp_iic_slave.h"
 #endif
 
-#if defined(MERCURY_BSP_HAS_CAN)
+#if defined(MERCURY_HAL_HAS_CAN)
 #include "bsp_can.h"
 #endif
 
-#if defined(MERCURY_BSP_HAS_USART)
+#if defined(MERCURY_HAL_HAS_USART)
 #include "bsp_usart.h"
 #endif
 
-#if defined(MERCURY_BSP_HAS_SPI)
+#if defined(MERCURY_HAL_HAS_SPI)
 #include "bsp_spi.h"
 #endif
 
-#if defined(MERCURY_BSP_HAS_PWM)
+#if defined(MERCURY_HAL_HAS_PWM)
 #include "bsp_pwm.h"
 #endif
 
-#if defined(MERCURY_BSP_HAS_USB)
+#if defined(MERCURY_HAL_HAS_USB)
 #include "bsp_usb.h"
 #endif
 
@@ -49,7 +49,7 @@
  * Call once after HAL_Init() / SystemClock_Config().
  * Peripheral-specific init (FDCAN::init, USART::init, …) stays with the app.
  */
-inline void MercuryBSP_Init(const uint32_t cpuFreqHz) {
+inline void MercuryHAL_Init(const uint32_t cpuFreqHz) {
     DWT_Time::init(cpuFreqHz);
     SEGGER_RTT_Init();
 }
