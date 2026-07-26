@@ -11,7 +11,8 @@ cmake_minimum_required(VERSION 3.22)
 #       [ALL])
 #
 #   mercury_add_modules(<target>
-#       [COMPONENTS Algorithm MessageCenter JScope Daemon LED Buzzer]
+#       [COMPONENTS Algorithm MessageCenter JScope Daemon LED Buzzer
+#                   Motor IMU Referee Vision]
 #       [ALL])
 #
 # The consumer target must already have HAL/CMSIS/FreeRTOS include paths
@@ -23,7 +24,7 @@ if(NOT DEFINED MERCURY_BSP_ROOT)
 endif()
 
 set(_MERCURY_BSP_COMPONENTS dwt gpio log iic can usart spi pwm usb segger)
-set(_MERCURY_MOD_COMPONENTS Algorithm MessageCenter JScope Daemon LED Buzzer)
+set(_MERCURY_MOD_COMPONENTS Algorithm MessageCenter JScope Daemon LED Buzzer Motor IMU Referee Vision)
 
 # Map component name -> relative source globs / include dirs / compile defs
 function(_mercury_bsp_component_files comp out_sources out_includes out_defs)
@@ -102,6 +103,22 @@ function(_mercury_mod_component_files comp out_sources out_includes)
         set(_src "${MERCURY_BSP_ROOT}/Modules/LED/led.cpp")
     elseif(comp STREQUAL "Buzzer")
         set(_src "${MERCURY_BSP_ROOT}/Modules/Buzzer/buzzer.cpp")
+    elseif(comp STREQUAL "Motor")
+        set(_src
+            "${MERCURY_BSP_ROOT}/Modules/Motor/dji_motor.cpp"
+            "${MERCURY_BSP_ROOT}/Modules/Motor/dm_motor.cpp")
+    elseif(comp STREQUAL "IMU")
+        set(_src
+            "${MERCURY_BSP_ROOT}/Modules/IMU/imu.cpp"
+            "${MERCURY_BSP_ROOT}/Modules/IMU/bmi088.cpp"
+            "${MERCURY_BSP_ROOT}/Modules/IMU/canopen_parser.c"
+            "${MERCURY_BSP_ROOT}/Modules/IMU/hipnuc_can_common.c")
+    elseif(comp STREQUAL "Referee")
+        set(_src
+            "${MERCURY_BSP_ROOT}/Modules/Referee/referee.cpp"
+            "${MERCURY_BSP_ROOT}/Modules/Referee/referee_ui.cpp")
+    elseif(comp STREQUAL "Vision")
+        set(_src "${MERCURY_BSP_ROOT}/Modules/Vision/vision.cpp")
     else()
         message(FATAL_ERROR "MercuryBSP: unknown Modules component '${comp}'")
     endif()

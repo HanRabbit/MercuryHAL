@@ -24,7 +24,7 @@ Application  →  Modules  →  BSP  →  CubeMX HAL / CMSIS / FreeRTOS
 | 层级 | 内容 |
 | --- | --- |
 | **BSP** | `dwt` `gpio` `log` `iic`(+slave) `can`(FDCAN) `usart` `spi` `pwm` `usb`(CDC) + SEGGER RTT |
-| **Modules** | `Algorithm` `MessageCenter` `JScope` `Daemon` `LED` `Buzzer` |
+| **Modules** | `Algorithm` `MessageCenter` `JScope` `Daemon` `LED` `Buzzer` `Motor` `IMU` `Referee` `Vision` |
 | **third_party** | SEGGER RTT（日志 / J-Scope） |
 
 HAL 句柄与引脚由**消费工程的 CubeMX** 提供；本库不包含启动文件、链接脚本或芯片专属 HAL 源码。
@@ -92,14 +92,32 @@ void app_init() {
 
 ### Modules
 
-| 组件 | 说明 |
-| --- | --- |
-| `Algorithm` | PID 控制器、EKF、`user_lib` 工具 |
-| `MessageCenter` | 发布/订阅消息中心（顺序无关） |
-| `JScope` | RTT 波形通道模板（header-only） |
-| `Daemon` | 掉线守护（周期 `Daemon::task()`） |
-| `LED` | GPIO LED + 状态闪烁模式 |
-| `Buzzer` | 基于 `PWM` 的蜂鸣器（配置注入，无板级硬编码） |
+| 组件 | 说明 | 依赖 BSP / 外部 |
+| --- | --- | --- |
+| `Algorithm` | PID、EKF、`user_lib` | `dwt`；EKF 需 **CMSIS-DSP**（`arm_math.h`） |
+| `MessageCenter` | 发布/订阅消息中心 | `log` |
+| `JScope` | RTT 波形通道（header-only） | `segger` |
+| `Daemon` | 掉线守护（周期 `Daemon::task()`） | — |
+| `LED` | GPIO LED + 状态闪烁 | `gpio` + CMSIS-RTOS2 |
+| `Buzzer` | PWM 蜂鸣器（Config 注入） | `pwm` |
+| `Motor` | `DJI_Motor` + `DM_Motor` + `Motor_Task()` | `can` `dwt` `log` `Daemon` `Algorithm`；DM debug 可选 `usart`+`usb` |
+| `IMU` | 超核 CAN / BMI088 SPI 统一接口 | `can` 或 `spi`+`gpio`；姿态融合需 **CMSIS-DSP** |
+| `Referee` | RM 裁判系统串口 + UI 绘制 | `usart` `Daemon` CMSIS-RTOS2 |
+| `Vision` | 视觉 USB CDC 定长帧协议 | `usb` `Daemon` |
+
+#### Motor 通用化要点
+
+- **DJI 分组发送**：按 `Config.can_init_config.hfdcan` 动态注册总线（最多 4 路），每总线 3 个 TX ID（`0x1FF/0x200/0x2FF`），不再写死 `hfdcan1/2`。
+- **DM 调试透传**：`Config.debug=true` 时必须同时提供 `Config.debug_huart`，由应用注入调试串口；默认关闭。
+
+#### IMU / Algorithm
+
+工程 CMake 需提供 CMSIS-DSP 头文件路径（CubeMX 勾选 DSP 后通常已有），例如：
+
+```cmake
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    Middlewares/ST/ARM/DSP/Inc)  # 按你的工程实际路径
+```
 
 ---
 
@@ -128,6 +146,8 @@ MercuryBSP/
 │   ├── dwt/ gpio/ log/ iic/ can/ usart/ spi/ pwm/ usb/
 ├── Modules/              # 通用功能模块
 │   ├── Algorithm/ MessageCenter/ JScope/ Daemon/ LED/ Buzzer/
+│   ├── Motor/ IMU/ Referee/ Vision/
+│   └── general_def.h
 ├── third_party/SEGGER/   # RTT
 ├── cmake/                # 预留
 ├── CMakeLists.txt        # mercury_add_bsp / mercury_add_modules
@@ -141,9 +161,9 @@ MercuryBSP/
 | 来源 | 并入内容 |
 | --- | --- |
 | ArmNode (STM32F103) | `iic`(+slave)、增强 `log`、`LED`、部分 dwt/gpio |
-| MercuryCore (STM32H723) | `can` `usart` `spi` `pwm` `usb`、`Algorithm` `MessageCenter` `JScope` `Daemon` `Buzzer` |
+| MercuryCore (STM32H723) | `can` `usart` `spi` `pwm` `usb`、全部 Modules（Motor/IMU/Referee/Vision 等） |
 
-后续计划：bxCAN、更灵活的 I2C bus-recover 引脚配置、更多设备类 Modules（电机 / IMU 等按需拆包）。
+后续计划：bxCAN、I2C bus-recover 引脚配置、设备驱动可选分包。
 
 ---
 
